@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Riddle Generator App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #51d0de, #f2d53c);
+    }
+    button {
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      border: none;
+      background: #bf4aa8;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    button:hover {
+      background: #7d3cff;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1>Riddle Generator</h1>
+    <p>Click “New Riddle” to get a random riddle, then reveal the answer.</p>
+
+    <button id="riddle-btn">New Riddle</button>
+    <button id="show-answer-btn">Show Answer</button>
+
+    <div class="app-output" id="riddle-text"></div>
+    <div class="app-output" id="answer-text"></div>
+
+    <p style="margin-top:1.5rem;">
+      <a href="scratch.html">Back to Scratch Page</a>
+    </p>
+  </div>
+
+  <script>
+    const riddles = [
+      { q: "What has keys but can’t open locks?", a: "A piano." },
+      { q: "What gets wetter the more it dries?", a: "A towel." },
+      { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
+      { q: "What has hands but cannot clap?", a: "A clock." },
+      { q: "What has a head and a tail but no body?", a: "A coin." }
+    ];
+
+    let currentIndex = 0;
+
+    const riddleText = document.getElementById("riddle-text");
+    const answerText = document.getElementById("answer-text");
+    const riddleBtn = document.getElementById("riddle-btn");
+    const answerBtn = document.getElementById("show-answer-btn");
+
+    function showRiddle() {
+      currentIndex = Math.floor(Math.random() * riddles.length);
+      riddleText.textContent = riddles[currentIndex].q;
+      answerText.textContent = "";
+    }
+
+    function showAnswer() {
+      if (riddles[currentIndex]) {
+        answerText.textContent = riddles[currentIndex].a;
+      }
+    }
+
+    riddleBtn.addEventListener("click", showRiddle);
+    answerBtn.addEventListener("click", showAnswer);
+
+    // Show an initial riddle
+    showRiddle();
+  </script>
+</body>
+</html>
