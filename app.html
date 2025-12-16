@@ -2,77 +2,362 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Riddle Generator App</title>
+  <title>Mini Wordle Clone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
   <style>
+    :root {
+      --tile-size: 55px;
+      --tile-gap: 6px;
+      --bg: #111827;
+      --tile-border: #4b5563;
+      --correct: #22c55e;
+      --present: #eab308;
+      --absent: #4b5563;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      background: linear-gradient(135deg, #51d0de, #f2d53c);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
     }
-    button {
-      padding: 0.6rem 1.1rem;
-      border-radius: 999px;
+
+    .game {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      padding: 1.5rem 1.5rem 1.2rem;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1rem;
+    }
+
+    .game-header h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .game-header a {
+      color: var(--accent);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    .board {
+      display: grid;
+      grid-template-rows: repeat(6, var(--tile-size));
+      grid-template-columns: repeat(5, var(--tile-size));
+      gap: var(--tile-gap);
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .tile {
+      border: 2px solid var(--tile-border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .tile.filled {
+      border-color: #6b7280;
+    }
+
+    .tile.correct {
+      background: var(--correct);
+      border-color: var(--correct);
+      color: #ecfdf5;
+    }
+
+    .tile.present {
+      background: var(--present);
+      border-color: var(--present);
+      color: #fefce8;
+    }
+
+    .tile.absent {
+      background: var(--absent);
+      border-color: var(--absent);
+      color: #e5e7eb;
+    }
+
+    .status {
+      min-height: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .controls input {
+      flex: 1;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: var(--text-main);
+      font-size: 1rem;
+      text-transform: uppercase;
+    }
+
+    .controls button {
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
       border: none;
-      background: #bf4aa8;
-      color: white;
-      font-weight: 600;
       cursor: pointer;
-      margin-right: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: var(--accent);
+      color: #0f172a;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
     }
-    button:hover {
-      background: #7d3cff;
+
+    .controls button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+      box-shadow: 0 8px 18px rgba(56, 189, 248, 0.4);
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --tile-size: 48px;
+        --tile-gap: 4px;
+      }
+      .game {
+        padding: 1.2rem 1.1rem 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <h1>Riddle Generator</h1>
-    <p>Click “New Riddle” to get a random riddle, then reveal the answer.</p>
+  <div class="game">
+    <div class="game-header">
+      <h1>Mini Wordle</h1>
+      <a href="scratch.html">Back to Scratch</a>
+    </div>
 
-    <button id="riddle-btn">New Riddle</button>
-    <button id="show-answer-btn">Show Answer</button>
+    <div id="board" class="board"></div>
 
-    <div class="app-output" id="riddle-text"></div>
-    <div class="app-output" id="answer-text"></div>
+    <div id="status" class="status">
+      Guess the 5-letter word in 6 tries.
+    </div>
 
-    <p style="margin-top:1.5rem;">
-      <a href="scratch.html">Back to Scratch Page</a>
-    </p>
+    <div class="controls">
+      <input
+        id="guess-input"
+        type="text"
+        maxlength="5"
+        placeholder="Type a 5-letter word"
+        autocomplete="off"
+      >
+      <button id="guess-btn">Guess</button>
+    </div>
+
+    <div class="footer">
+      <span id="attempts-label">Attempt 1 of 6</span>
+      <a href="#" id="restart-link">New word</a>
+    </div>
   </div>
 
   <script>
-    const riddles = [
-      { q: "What has keys but can’t open locks?", a: "A piano." },
-      { q: "What gets wetter the more it dries?", a: "A towel." },
-      { q: "I speak without a mouth and hear without ears. What am I?", a: "An echo." },
-      { q: "What has hands but cannot clap?", a: "A clock." },
-      { q: "What has a head and a tail but no body?", a: "A coin." }
+    // Simple word list
+    const WORDS = [
+      "APPLE", "BERRY", "CLOUD", "GRAPE", "PLANT",
+      "WATER", "MANGO", "FRUIT", "LEMON", "STONE",
+      "BRICK", "BOARD", "SMILE", "CRANE", "TRACE"
     ];
 
-    let currentIndex = 0;
+    const board = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const guessInput = document.getElementById("guess-input");
+    const guessBtn = document.getElementById("guess-btn");
+    const attemptsLabel = document.getElementById("attempts-label");
+    const restartLink = document.getElementById("restart-link");
 
-    const riddleText = document.getElementById("riddle-text");
-    const answerText = document.getElementById("answer-text");
-    const riddleBtn = document.getElementById("riddle-btn");
-    const answerBtn = document.getElementById("show-answer-btn");
+    let solution = "";
+    let currentRow = 0;
+    const maxRows = 6;
+    const wordLength = 5;
 
-    function showRiddle() {
-      currentIndex = Math.floor(Math.random() * riddles.length);
-      riddleText.textContent = riddles[currentIndex].q;
-      answerText.textContent = "";
+    function pickRandomWord() {
+      const index = Math.floor(Math.random() * WORDS.length);
+      return WORDS[index];
     }
 
-    function showAnswer() {
-      if (riddles[currentIndex]) {
-        answerText.textContent = riddles[currentIndex].a;
+    function buildBoard() {
+      board.innerHTML = "";
+      for (let row = 0; row < maxRows; row++) {
+        for (let col = 0; col < wordLength; col++) {
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          tile.dataset.row = row;
+          tile.dataset.col = col;
+          board.appendChild(tile);
+        }
       }
     }
 
-    riddleBtn.addEventListener("click", showRiddle);
-    answerBtn.addEventListener("click", showAnswer);
+    function resetGame() {
+      solution = pickRandomWord();
+      currentRow = 0;
+      buildBoard();
+      statusEl.textContent = "Guess the 5-letter word in 6 tries.";
+      attemptsLabel.textContent = "Attempt 1 of 6";
+      guessInput.value = "";
+      guessInput.disabled = false;
+      guessBtn.disabled = false;
+      // console.log("Solution:", solution); // uncomment for debugging
+    }
 
-    // Show an initial riddle
-    showRiddle();
+    function showStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? "#f97373" : "#9ca3af";
+    }
+
+    function colorRow(guess) {
+      const solutionChars = solution.split("");
+      const guessChars = guess.split("");
+
+      // First pass: mark correct positions
+      const results = new Array(wordLength).fill("absent");
+
+      for (let i = 0; i < wordLength; i++) {
+        if (guessChars[i] === solutionChars[i]) {
+          results[i] = "correct";
+          solutionChars[i] = null; // mark as used
+        }
+      }
+
+      // Second pass: mark present (wrong spot)
+      for (let i = 0; i < wordLength; i++) {
+        if (results[i] === "correct") continue;
+        const index = solutionChars.indexOf(guessChars[i]);
+        if (index !== -1) {
+          results[i] = "present";
+          solutionChars[index] = null;
+        }
+      }
+
+      // Apply colors to tiles
+      for (let col = 0; col < wordLength; col++) {
+        const tile = board.querySelector(
+          `.tile[data-row="${currentRow}"][data-col="${col}"]`
+        );
+        tile.classList.remove("filled");
+        tile.classList.add(results[col]);
+      }
+    }
+
+    function handleGuess() {
+      if (guessBtn.disabled) return;
+
+      let guess = guessInput.value.trim().toUpperCase();
+      if (guess.length !== wordLength) {
+        showStatus("Enter exactly 5 letters.", true);
+        return;
+      }
+
+      // Basic A–Z check
+      if (!/^[A-Z]{5}$/.test(guess)) {
+        showStatus("Letters only, please.", true);
+        return;
+      }
+
+      // Fill row tiles
+      for (let col = 0; col < wordLength; col++) {
+        const tile = board.querySelector(
+          `.tile[data-row="${currentRow}"][data-col="${col}"]`
+        );
+        tile.textContent = guess[col];
+        tile.classList.add("filled");
+      }
+
+      colorRow(guess);
+
+      if (guess === solution) {
+        showStatus(`Nice! "${solution}" is correct.`, false);
+        attemptsLabel.textContent = `Solved in ${currentRow + 1} of ${maxRows} tries`;
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+        return;
+      }
+
+      currentRow++;
+      if (currentRow >= maxRows) {
+        showStatus(`Out of tries. The word was "${solution}".`, true);
+        attemptsLabel.textContent = "Game over";
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+      } else {
+        attemptsLabel.textContent = `Attempt ${currentRow + 1} of ${maxRows}`;
+        showStatus("Keep guessing!", false);
+      }
+
+      guessInput.value = "";
+      guessInput.focus();
+    }
+
+    // Event listeners
+    guessBtn.addEventListener("click", handleGuess);
+
+    guessInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleGuess();
+      }
+    });
+
+    restartLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      resetGame();
+      guessInput.focus();
+    });
+
+    // Start the game
+    resetGame();
   </script>
 </body>
 </html>
